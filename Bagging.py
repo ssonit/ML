@@ -1,10 +1,9 @@
 import numpy as np
-from sklearn.naive_bayes import GaussianNB
 from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.ensemble import BaggingClassifier
 from sklearn.tree import DecisionTreeClassifier
-
+import time
 
 data = open('ring.dat').read().split('\n')
 
@@ -42,16 +41,24 @@ precisions = []
 recalls = []
 f1_scores = []
 
+# List để lưu trữ thời gian thực thi của từng lần chạy
+execution_times = []
+
 # Thực hiện k-fold cross-validation
 for train_index, test_index in kf.split(X):
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
+
+    start_time = time.time()  # Bắt đầu đếm thời gian
 
     # Huấn luyện mô hình Bagging
     nb_classifier.fit(X_train, y_train)
 
     # Dự đoán
     y_pred = nb_classifier.predict(X_test)
+    end_time = time.time()  # Kết thúc đếm thời gian
+    execution_time = end_time - start_time
+    execution_times.append(execution_time)
 
     # Tính toán các độ đo đánh giá
     accuracy = accuracy_score(y_test, y_pred)
@@ -70,9 +77,12 @@ average_accuracy = np.mean(accuracies)
 average_precision = np.mean(precisions)
 average_recall = np.mean(recalls)
 average_f1 = np.mean(f1_scores)
+average_execution_time = np.mean(execution_times)
+
 
 
 print(f'Average Accuracy: %.3f%%' % (average_accuracy * 100))
 print(f'Average Precision: %.3f%%' % (average_precision * 100))
 print(f'Average Recall: %.3f%%' % (average_recall * 100))
 print(f'Average F1 Score: %.3f%%' % (average_f1 * 100))
+print(f'Average Execution Time: %.5f seconds' % average_execution_time)
